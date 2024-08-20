@@ -29,8 +29,8 @@ args = parser.parse_args()
 
 ## hg19 version to hg38
 def hg19_to_hg38(ifile,ofile,tranfomertype):
-    #Define the command-line parameters for tranformer
-    tranformer_command = [
+    #Define the command line parameters for tranformer
+    transformer_command = [
         'sh',
         here + 'hg19-to-hg38.sh',
         ifile,
@@ -39,7 +39,7 @@ def hg19_to_hg38(ifile,ofile,tranfomertype):
     ]
     
     #run command
-    subprocess.run(tranformer_command)
+    subprocess.run(transformer_command)
 
 ## process the path of input files
 if args.i[0] != '/' and args.i[0] != '.':
@@ -83,11 +83,13 @@ def run_annovar():
     subprocess.run(ANNOVAR_command)
 
 
-'''input_vcf = 'input.vcf'
+'''
+input_vcf = 'input.vcf'
 output_vcf = 'output.vcf'
 reference_genome = 'GRCh38'
-annotation_database = 'dbNSFP,gnomAD'
-plugin_parameter = 'my_plugin_param_value'''
+annotation_database = 'dbNSFP, gnomAD'
+plugin_parameter = 'my_plugin_param_value
+'''
 
 
 run_annovar()
