@@ -36,9 +36,9 @@ class KDE:
         return x_average/self.n
             
     ## kernel funtion
-    def gaussian_kernel(self,x):
+    def gaussian_kernel(self, x):
         """
-        gaussian funtion
+        gaussian function
         """
         return (1 / np.sqrt(2 * np.pi)) * np.exp(-0.5 * x**2)
     
@@ -54,10 +54,10 @@ class KDE:
     def h_opt(self):
         defactor = self.defactor
         n = self.n
-        return 1.059*np.power(defactor,1/2)*np.power(n,-1/5)
+        return 1.059*np.power(defactor, 1/2)*np.power(n, -1/5)
     
     ## get density function 
-    def density_function(self,x):
+    def density_function(self, x):
         result = 0
         for i in self.data:
             param = (x - i) / self.hopt
@@ -67,17 +67,17 @@ class KDE:
 
     ## compute bandwidth
     def compute_bandwidth(self,x):
-        c = (3 / 8) * np.power(np.pi,-1 / 2) * np.power(self.hopt,-5)
+        c = (3 / 8) * np.power(np.pi, -1 / 2) * np.power(self.hopt, -5)
         m = 0.0
         # print(self.h_opt())
         for i in self.data:
             t = (x - i) / self.hopt
-            m += (np.power(t,2)*self.gaussian_kernel(t)) / (self.n * self.hopt)
+            m += (np.power(t, 2)*self.gaussian_kernel(t)) / (self.n * self.hopt)
             # print(t)
             # print( self.gaussian_kernel(t))
         # print(m - self.density_function(x))
         g = np.power(np.abs(m - self.density_function(x)),2/5)
-        h = np.power(self.hopt,9/5) * np.power(c,1/5) * np.power( self.density_function(x),1/5) / g
+        h = np.power(self.hopt, 9/5) * np.power(c, 1/5) * np.power(self.density_function(x), 1/5) / g
         return h
         
       ## compute density function
