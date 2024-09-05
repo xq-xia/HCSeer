@@ -50,7 +50,7 @@ class KDE:
         # print(np.sqrt(j/ self.n))
         return np.sqrt(j / self.n)
     
-    ## get the optimal fixed bandwidth
+    ##  get the optimal fixed bandwidth
     def h_opt(self):
         defactor = self.defactor
         n = self.n
