@@ -13,13 +13,13 @@ perl $here/annovar/annotate_variation.pl -downdb -buildver hg38 -webfrom annovar
 
 ###database processing
 sed -i '1d' $here/topic_PM1/topic_PM1_code/database/clinvar-$batch-BLB.vcf
-cut -f1,2,4,5 $here/topic_PM1/topic_PM1_code/database/clinvar-$batch-BLB.vcf | awk -F "\t" '{m=0;len=length($3);m=$2+len-1;chr=gsub(/$1/, "");print chr "\t" $2 "\t" m "\t" $3 "\t" $4}' > $here/topic_PM1/topic_PM1_code/database/BLB.vcf
+cut -f1,2,4,5 $here/topic_PM1/topic_PM1_code/database/clinvar-$batch-BLB.vcf | awk -F "\t" '{m=0;len=length($3);m=$2+len-1;chr=gsub(/chr/, $1,"");print $1 "\t" $2 "\t" m "\t" $3 "\t" $4}' > $here/topic_PM1/topic_PM1_code/database/BLB.vcf
 sed -i '1d' $here/topic_PM1/topic_PM1_code/database/clinvar-$batch-PLP.vcf
-cut -f1,2,4,5 $here/topic_PM1/topic_PM1_code/database/clinvar-$batch-PLP.vcf | awk -F "\t" '{m=0;len=length($3);m=$2+len-1;chr=gsub(/$1/, "");print chr "\t" $2 "\t" m "\t" $3 "\t" $4}' > $here/topic_PM1/topic_PM1_code/database/PLP.vcf
+cut -f1,2,4,5 $here/topic_PM1/topic_PM1_code/database/clinvar-$batch-PLP.vcf | awk -F "\t" '{m=0;len=length($3);m=$2+len-1;chr=gsub(/chr/, $1,"");print $1 "\t" $2 "\t" m "\t" $3 "\t" $4}' > $here/topic_PM1/topic_PM1_code/database/PLP.vcf
 sed -i '1d' $here/topic_PM1/topic_PM1_code/database/clinvar-$batch-VUS.vcf
-cut -f1,2,4,5 $here/topic_PM1/topic_PM1_code/database/clinvar-$batch-VUS.vcf | awk -F "\t" '{m=0;len=length($3);m=$2+len-1;chr=gsub(/$1/, "");print chr "\t" $2 "\t" m "\t" $3 "\t" $4}' > $here/topic_PM1/topic_PM1_code/database/VUS.vcf
+cut -f1,2,4,5 $here/topic_PM1/topic_PM1_code/database/clinvar-$batch-VUS.vcf | awk -F "\t" '{m=0;len=length($3);m=$2+len-1;chr=gsub(/chr/, $1,"");print $1 "\t" $2 "\t" m "\t" $3 "\t" $4}' > $here/topic_PM1/topic_PM1_code/database/VUS.vcf
 sed -i '1d' $here/topic_PM1/topic_PM1_code/database/clinvar-$batch-CON.vcf
-cut -f1,2,4,5 $here/topic_PM1/topic_PM1_code/database/clinvar-$batch-CON.vcf | awk -F "\t" '{m=0;len=length($3);m=$2+len-1;chr=gsub(/$1/, "");print chr "\t" $2 "\t" m "\t" $3 "\t" $4}' > $here/topic_PM1/topic_PM1_code/database/CON.vcf
+cut -f1,2,4,5 $here/topic_PM1/topic_PM1_code/database/clinvar-$batch-CON.vcf | awk -F "\t" '{m=0;len=length($3);m=$2+len-1;chr=gsub(/chr/, $1,"");print $1 "\t" $2 "\t" m "\t" $3 "\t" $4}' > $here/topic_PM1/topic_PM1_code/database/CON.vcf
 
 ### annotation by annovar
 perl 	/data/xiaxq/annovar/annotate_variation.pl -geneanno -buildver hg38 -dbtype refGene -outfile /data/xiaxq/topic_PM1/topic_PM1_code/database/clinvar_annotation/annotation-PLP.refGene -exonsort -nofirstcodondel /data/xiaxq/topic_PM1/topic_PM1_code/database/PLP.vcf /data/xiaxq/annovar/humandb/
