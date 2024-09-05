@@ -1,0 +1,1 @@
+type	chr	start	end	ref	alt	genename	iso	exonic	aa_position
