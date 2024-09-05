@@ -98,13 +98,13 @@ def compute_profile_coefficient():
             for i in label_interval:
                 result_file.write(gene + '\t' + str(new_interval[i][0]) + ',' + str(new_interval[i][1]) + '\t' + str(
                     silhouette_per_cluster[i]) + '\n')
-                ## If there is only one cluster in the transcript, the contour coefficient is 0.4 to 0.6 
+                ## If there is only one cluster in the transcript, the contour coefficient is -1 to 1
         elif len(list(set(label))) == 1 and len(new_interval) == 1:
             result_file.write(gene + '\t' + str(new_interval[0][0]) + ',' + str(new_interval[0][1]) + '\t' + str(
-                format(random.uniform(0.4, 0.6), '.8f')) + '\n')
+                format(random.uniform(-1, 1), '.8f')) + '\n')
         else:
             result_file.write(gene + '\t' + str(new_interval[1][0]) + ',' + str(new_interval[1][1]) + '\t' + str(
-                format(random.uniform(0.4, 0.6), '.8f')) + '\n')
+                format(random.uniform(-1, 1), '.8f')) + '\n')
 
     ###Calculate the contour coefficient of the coldspot interval
     cold = df[df['type'] == 'coldspot']
