@@ -12,15 +12,16 @@ This file is some intermediate results or functions for file preprocessing
 import pandas as pd
 import numpy as np
 
+here = '/data/xiaxq/topic_PM1/topic_PM1_code/database/'
 def add_Sumbiter():
-    f = open('/data/xiaxq/topic_PM1/topic_PM1_code/database/tmp/hot_cold_spot_modify(no-mutation-ratio)(2-sigama).txt',
+    f = open(here + 'tmp/hot_cold_spot_modify(no-mutation-ratio)(2-sigama).txt',
              'r')
-    df = pd.read_csv('/data/xiaxq/topic_PM1/topic_PM1_code/database/tmp/final_variant-add-NumberSubmitters.txt',
+    df = pd.read_csv(here + 'tmp/final_variant-add-NumberSubmitters.txt',
                      sep='\t', low_memory=False)
-    df_BLB = pd.read_csv('/data/xiaxq/topic_PM1/topic_PM1_code/database/tmp/final_BLB_variant-add-NumberSubmitters.txt',
+    df_BLB = pd.read_csv(here + 'tmp/final_BLB_variant-add-NumberSubmitters.txt',
                          sep='\t', low_memory=False)
 
-    r = open('/data/xiaxq/topic_PM1/topic_PM1_code/database/tmp/test-Number-submitter.txt', 'w')
+    r = open(here + 'tmp/test-Number-submitter.txt', 'w')
 
     count = 0
     for line in f:
@@ -73,11 +74,11 @@ def add_Sumbiter():
 
     print('ok')
 
-    all_vcf = pd.read_csv('/data/xiaxq/topic_PM1/topic_PM1_code/database/clinvar_20240407_temp.vcf', sep='\t',
+    all_vcf = pd.read_csv(here + 'clinvar_20240407_temp.vcf', sep='\t',
                           low_memory=False)
-    f = open('/data/xiaxq/topic_PM1/topic_PM1_code/database/tmp/interval_first_aapos.txt', 'r')
+    f = open(here + 'tmp/interval_first_aapos.txt', 'r')
 
-    result = open("/data/xiaxq/topic_PM1/topic_PM1_code/database/tmp/final_variant_add_rsid.txt", 'w')
+    result = open(here + 'tmp/final_variant_add_rsid.txt', 'w')
 
     # PLP     1       1041335 1041346 AGCTCCTGCGCC    A       AGRN    NM_198576.4     exon5   298     hotspot 262     2224
     result.write('#CHROM' + '\t' + 'POS' + '\t' + 'ID'
@@ -149,11 +150,11 @@ def ENST_to_NCBI():
 def var_in_hotspot_or_coldspot():
 
     df = pd.read_csv(
-        "/data/xiaxq/topic_PM1/topic_PM1_code/database/update_database/hot_cold_result-and-profile-coefficient(1-sigama).txt",
+        here + 'update_database/hot_cold_result-and-profile-coefficient(1-sigama).txt',
         sep='\t', low_memory=False)
-    fin_vus = open("/data/xiaxq/topic_PM1/topic_PM1_code/database/tmp/final_variant_20240711.txt", 'r')
+    fin_vus = open(here + 'tmp/final_variant_20240711.txt', 'r')
     coldspot = df[df['type'] == 'coldspot']
-    # result = open('/data/xiaxq/topic_PM1/topic_PM1_code/database/update_database/all_clinvar_var_in_hotspot.txt','w')
+    # result = open(here + 'update_database/all_clinvar_var_in_hotspot.txt','w')
     count = 0
 
     for line in fin_vus:
@@ -174,13 +175,13 @@ def var_in_hotspot_or_coldspot():
 import tabix
 def compute_var_Alphamiessense():
 
-    filename = "/data/xiaxq/topic_PM1/topic_PM1_code/database/Alphamiessense/AlphaMissense_hg38_sort.vcf.gz"
+    filename = here + 'Alphamiessense/AlphaMissense_hg38_sort.vcf.gz'
     tb = tabix.open(filename)
 
 
-    vus = open("/data/xiaxq/topic_PM1/topic_PM1_code/database/tmp/final_BLB_variant_0711.txt", 'r')
+    vus = open(here + 'tmp/final_BLB_variant_0711.txt', 'r')
     count = 0
-    result = open('/data/xiaxq/topic_PM1/topic_PM1_code/database/BLB_Alphamiessense.txt', 'w')
+    result = open(here + 'BLB_Alphamiessense.txt', 'w')
     for line in vus:
         data = line.split('\t')
         records = tb.query(str(data[1]), int(data[2]) - 1, int(data[2]))
@@ -193,12 +194,12 @@ def compute_var_Alphamiessense():
 
 def compute_var_Mutscore():
 
-    filename = "/data/xiaxq/topic_PM1/topic_PM1_code/database/hg38_mutscore_sort.txt.gz"
+    filename = here + 'hg38_mutscore_sort.txt.gz'
     tb = tabix.open(filename)
 
-    vus = open('/data/xiaxq/topic_PM1/topic_PM1_code/database/temp/var_in_hotspot.txt', 'r')
+    vus = open(here + 'temp/var_in_hotspot.txt', 'r')
     count = 0
-    result = open('/data/xiaxq/topic_PM1/topic_PM1_code/database/temp/vus_hot_mutscore_ADD_PLP.txt', 'w')
+    result = open(here + 'temp/vus_hot_mutscore_ADD_PLP.txt', 'w')
     for line in vus:
         data = line.split('\t')
         records = tb.query(str(data[1]), int(data[2])-1, int(data[3]))
@@ -215,8 +216,8 @@ def compute_var_Mutscore():
 get all aa length
 '''
 def get_all_BLB_or_PLP_gene():
-    PLP = open('/data/xiaxq/topic_PM1/topic_PM1_code/database/update_database/final_BLB_variant.txt','r')
-    file = open('/data/xiaxq/topic_PM1/topic_PM1_code/database/update_database/all_BLB_gene.vcf','w')
+    PLP = open(here + 'update_database/final_BLB_variant.txt','r')
+    file = open(here + 'update_database/all_BLB_gene.vcf','w')
 
     gene = []
     for line in PLP:
@@ -229,10 +230,10 @@ def get_all_BLB_or_PLP_gene():
 
 
 def var_in_hotspot_add_rsid():
-    all_vcf =pd.read_csv('/data/xiaxq/topic_PM1/topic_PM1_code/database/clinvar_20240407.vcf', sep='\t', low_memory=False)
-    f = open('/data/xiaxq/topic_PM1/topic_PM1_code/database/update_database/all_clinvar_var_in_hotspot.txt','r')
+    all_vcf =pd.read_csv(here + 'clinvar_20240407.vcf', sep='\t', low_memory=False)
+    f = open(here + 'update_database/all_clinvar_var_in_hotspot.txt','r')
 
-    result = open("/data/xiaxq/topic_PM1/topic_PM1_code/database/update_database/all_clinvar_var_in_hotspot_add_rsid.txt",'w')
+    result = open(here + 'update_database/all_clinvar_var_in_hotspot_add_rsid.txt','w')
 
     #PLP     1       1041335 1041346 AGCTCCTGCGCC    A       AGRN    NM_198576.4     exon5   298
     result.write('#CHROM' + '\t' +  'POS' + '\t' + 'ID'
@@ -323,11 +324,11 @@ def vep_result_process_2():
 def get_ALL_VUS_CON_less_2star():
 
 
-    fin_vus = open("/data/xiaxq/topic_PM1/topic_PM1_code/database/clinvar_20240407.vcf",'r')
+    fin_vus = open(here + 'clinvar_20240407.vcf','r')
 
     count = 0
 
-    result = open("/data/xiaxq/topic_PM1/topic_PM1_code/database/update_database/ALL_VUS_CON_less2star.txt",'w')
+    result = open(here + 'update_database/ALL_VUS_CON_less2star.txt','w')
 
     for line in fin_vus:
         if count == 0:
