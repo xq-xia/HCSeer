@@ -310,6 +310,7 @@ def PS1_var_in_hotspot():
         ref = data[3]
         alt = data[4]
         clinvar_in_hotspot.seek(0)
+
         for elem in clinvar_in_hotspot:
             info = elem.split('\t')
             if info[0] == chr and info[1] == pos and info[3] == ref and info[4] == alt:
