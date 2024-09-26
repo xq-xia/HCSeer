@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-### Made by xiaxingquan
-### june 2024
+# Made by xiaxingquan
+# june 2024
 
 # coding = utf-8
 
@@ -14,6 +14,7 @@ from sklearn.metrics import silhouette_samples
 
 here = '/data/xiaxq/topic_PM1/topic_PM1_code/database/'
 
+
 def compute_profile_coefficient():
     all_variant = pd.read_csv(here + 'tmp/final_variant.txt', sep='\t',
                               low_memory=False)
@@ -23,35 +24,37 @@ def compute_profile_coefficient():
     result_file = open(
         here + 'tmp/profile-coefficient(no-mutation-ratio)(2-sigama).txt', 'w')
 
-    result_file.write('gene' + '\t' + 'interval' + '\t' + 'profile-coefficient' + '\n')
+    result_file.write(
+        f"{'\t'.join(['gene', 'interval', 'profile-coefficient'])}\n")
 
-    ###Calculate the contour coefficient of the hotspot interval
+    # Calculate the contour coefficient of the hotspot interval
     hot = df[df['type'] == 'hotspot']
 
-    ##get hotspot gene list
+    # get hotspot gene list
     hot_geneList = hot['gene'].unique()
 
     for gene in hot_geneList:
-        ##get variant
+        # get variant
         get_variant = all_variant[all_variant['genename'] == gene]
         PLP = get_variant[get_variant['type'] == 'PLP']
 
         inter = hot[hot['gene'] == gene]
 
-        ##get interval
+        # get interval
         intervals = []
         for i in range(0, len(list(inter['aa_start_pos']))):
-            intervals.append([int(list(inter['aa_start_pos'])[i]), int(list(inter['aa_end_pos'])[i])])
+            intervals.append(
+                [int(list(inter['aa_start_pos'])[i]), int(list(inter['aa_end_pos'])[i])])
             # print(list(inter['aa_start_pos']))
         samples = list(PLP['aa_position'])
 
-        ##sort intervals
+        # sort intervals
         intervals = sorted(intervals, key=lambda x: x[0])
         label = []
         new_interval = []
 
         count = 0
-        ##Assign labels to samples based on intervals
+        # Assign labels to samples based on intervals
         for i in intervals:
             if count == 0:
                 if 1 < intervals[0][0]:
@@ -60,7 +63,8 @@ def compute_profile_coefficient():
                 else:
                     new_interval.append(intervals[0])
             else:
-                new_interval.append([intervals[intervals.index(i) - 1][1] + 1, i[0] - 1])
+                new_interval.append(
+                    [intervals[intervals.index(i) - 1][1] + 1, i[0] - 1])
                 new_interval.append(i)
 
             count += 1
@@ -75,7 +79,7 @@ def compute_profile_coefficient():
         label_interval = []
         for elem in intervals:
             label_interval.append(new_interval.index(elem))
-        ##duplicate removal
+        # duplicate removal
         process = list(set(label))
         result = []
         for g in label_interval:
@@ -87,26 +91,32 @@ def compute_profile_coefficient():
 
         samples = np.array(sample)
 
-        if len(list(set(label))) > 1:
-            labels = np.array(label)
-            sample_silhouette_values = silhouette_samples(samples, labels)
+        try:
+            if len(list(set(label))) > 1:
+                labels = np.array(label)
+                sample_silhouette_values = silhouette_samples(samples, labels)
 
-            silhouette_per_cluster = {}
-            for label in np.unique(labels):
-                silhouette_per_cluster[label] = np.mean(sample_silhouette_values[labels == label])
+                silhouette_per_cluster = {}
+                for label in np.unique(labels):
+                    silhouette_per_cluster[label] = np.mean(
+                        sample_silhouette_values[labels == label])
 
-            for i in label_interval:
-                result_file.write(gene + '\t' + str(new_interval[i][0]) + ',' + str(new_interval[i][1]) + '\t' + str(
-                    silhouette_per_cluster[i]) + '\n')
-                ## If there is only one cluster in the transcript, the contour coefficient is -1 to 1
-        elif len(list(set(label))) == 1 and len(new_interval) == 1:
-            result_file.write(gene + '\t' + str(new_interval[0][0]) + ',' + str(new_interval[0][1]) + '\t' + str(
-                format(random.uniform(-1, 1), '.8f')) + '\n')
-        else:
-            result_file.write(gene + '\t' + str(new_interval[1][0]) + ',' + str(new_interval[1][1]) + '\t' + str(
-                format(random.uniform(-1, 1), '.8f')) + '\n')
+                for i in label_interval:
+                    result_file.write(
+                        gene + '\t' + str(new_interval[i][0]) + ',' + str(new_interval[i][1]) + '\t' + str(
+                            silhouette_per_cluster[i]) + '\n')
+                    # If there is only one cluster in the transcript, the
+                    # contour coefficient is -1 to 1
+            elif len(list(set(label))) == 1 and len(new_interval) == 1:
+                result_file.write(gene + '\t' + str(new_interval[0][0]) + ',' + str(new_interval[0][1]) + '\t' + str(
+                    format(random.uniform(-1, 1), '.8f')) + '\n')
+            else:
+                result_file.write(gene + '\t' + str(new_interval[1][0]) + ',' + str(new_interval[1][1]) + '\t' + str(
+                    format(random.uniform(-1, 1), '.8f')) + '\n')
+        except Exception as e:
+            print(e)
 
-    ###Calculate the contour coefficient of the coldspot interval
+    # Calculate the contour coefficient of the coldspot interval
     cold = df[df['type'] == 'coldspot']
 
     cold_geneList = cold['gene'].unique()
@@ -119,7 +129,8 @@ def compute_profile_coefficient():
 
         intervals = []
         for i in range(0, len(list(inter['aa_start_pos']))):
-            intervals.append([int(list(inter['aa_start_pos'])[i]), int(list(inter['aa_end_pos'])[i])])
+            intervals.append(
+                [int(list(inter['aa_start_pos'])[i]), int(list(inter['aa_end_pos'])[i])])
             # print(list(inter['aa_start_pos']))
         samples = list(BLB['aa_position'])
 
@@ -136,7 +147,8 @@ def compute_profile_coefficient():
                 else:
                     new_interval.append(intervals[0])
             else:
-                new_interval.append([intervals[intervals.index(i) - 1][1] + 1, i[0] - 1])
+                new_interval.append(
+                    [intervals[intervals.index(i) - 1][1] + 1, i[0] - 1])
                 new_interval.append(i)
 
             count += 1
@@ -163,29 +175,35 @@ def compute_profile_coefficient():
 
         samples = np.array(sample)
 
-        if len(list(set(label))) > 1:
-            labels = np.array(label)
-            sample_silhouette_values = silhouette_samples(samples, labels)
+        try:
+            if len(list(set(label))) > 1:
+                labels = np.array(label)
+                sample_silhouette_values = silhouette_samples(samples, labels)
 
-            silhouette_per_cluster = {}
-            for label in np.unique(labels):
-                silhouette_per_cluster[label] = np.mean(sample_silhouette_values[labels == label])
+                silhouette_per_cluster = {}
+                for label in np.unique(labels):
+                    silhouette_per_cluster[label] = np.mean(
+                        sample_silhouette_values[labels == label])
 
-            for i in label_interval:
-                result_file.write(gene + '\t' + str(new_interval[i][0]) + ',' + str(new_interval[i][1]) + '\t' + str(
-                    silhouette_per_cluster[i]) + '\n')
+                for i in label_interval:
+                    result_file.write(
+                        gene + '\t' + str(new_interval[i][0]) + ',' + str(new_interval[i][1]) + '\t' + str(
+                            silhouette_per_cluster[i]) + '\n')
+        except Exception as e:
+            print(e)
 
     result_file.close()
     del df
     del all_variant
 
-    ###Write the contour coefficient result into the interval result
+    # Write the contour coefficient result into the interval result
     file_input = open(
         here + 'tmp/hot_cold_spot_modify(no-mutation-ratio)(2-sigama).txt', 'r')
     file_profile = open(
         here + 'tmp/profile-coefficient(no-mutation-ratio)(2-sigama).txt', 'r')
     file_result = open(
-        here + 'tmp/hot_cold_result-and-profile-coefficient(no-mutation-ratio)(2-sigama).txt',
+        here +
+        'tmp/hot_cold_result-and-profile-coefficient(no-mutation-ratio)(2-sigama).txt',
         'w')
 
     count = 0
@@ -193,7 +211,13 @@ def compute_profile_coefficient():
         flag = 0
         file_profile.seek(0)
         if count == 0:
-            file_result.write(line.replace('\n', '') + '\t' + 'profile-coefficient' + '\n')
+            file_result.write(
+                line.replace(
+                    '\n',
+                    '') +
+                '\t' +
+                'profile-coefficient' +
+                '\n')
         for pro in file_profile:
             data = line.split('\t')
             coe = pro.split('\t')
@@ -211,10 +235,7 @@ def compute_profile_coefficient():
     file_result.close()
 
     print('ok')
-    
+
+
 if __name__ == '__main__':
     compute_profile_coefficient()
-       
-        
-
-

@@ -1,35 +1,42 @@
 import numpy as np
 import pandas as pd
 
-'''
-PS1 and PM1
-PP2 and PM1
-PM5 and PM1
-coldspot and BP1
-'''
+"""
+    PS1 and PM1
+    PP2 and PM1
+    PM5 and PM1
+    coldspot and BP1
+"""
 
 here = 'C:/Users/xiaxq/Desktop/topic-PM1-tep-file/'
 
-def process():
-    PLP = open(here + 'update_database-annotation-PLP.refGene.exonic_variant_function','r')
-    BLB = open(here + 'update_database-annotation-BLB.refGene.exonic_variant_function','r')
-    result = open(here + 'PP2_BP1_process.txt','w')
 
-    ##得到所有PLP基因列表
+def process():
+    PLP = open(
+        here +
+        'update_database-annotation-PLP.refGene.exonic_variant_function',
+        'r')
+    BLB = open(
+        here +
+        'update_database-annotation-BLB.refGene.exonic_variant_function',
+        'r')
+    result = open(here + 'PP2_BP1_process.txt', 'w')
+
+    # 得到所有PLP基因列表
     PLP_geneList = []
     for line in PLP:
         if line.split('\t')[2].split(':')[0] not in PLP_geneList:
             PLP_geneList.append(line.split('\t')[2].split(':')[0])
 
-    ##文件指针归0
+    # 文件指针归0
     PLP.seek(0)
 
     count = 0
     resultList = []
     for gene in PLP_geneList:
         count += 1
-        ###基因名、PLP无义数量、PLP移码数量、PLP错义数量、BLB无义数量、BLB移码数量、BLB错义数量
-        resultList.append([gene,0,0,0,0,0,0])
+        # 基因名、PLP无义数量、PLP移码数量、PLP错义数量、BLB无义数量、BLB移码数量、BLB错义数量
+        resultList.append([gene, 0, 0, 0, 0, 0, 0])
         PLP.seek(0)
         for plp in PLP:
             geneName = plp.split('\t')[2].split(':')[0]
@@ -55,24 +62,28 @@ def process():
                     resultList[-1][6] += 1
         print(f'{count} genes have been completed')
     for re in resultList:
-        result.write(re[0] + '\t' + str(re[1]) + '\t' + str(re[2]) + '\t' + str(re[3]) + '\t' + str(re[4]) + '\t' + str(re[5])  + '\t' + str(re[6]) + '\n')
+        container = [
+            re[0], str(re[1]), str(re[2]), str(re[3]), str(re[4]), str(re[5]), str(re[6])
+        ]
+        result.write(f"{'\t'.join(container)}\n")
 
     PLP.close()
     BLB.close()
     result.close()
     print('ok')
 
+
 def PP2():
-    primary = open(here + 'PP2_BP1_process.txt','r')
+    primary = open(here + 'PP2_BP1_process.txt', 'r')
     PP2_gene = []
 
     for line in primary:
         data = line.split('\t')
-        pp2_t1,pp2_t2 =0,0
+        pp2_t1, pp2_t2 = 0, 0
 
         if int(data[3]) / (int(data[1]) + int(data[2]) + int(data[3])) >= 0.8:
             pp2_t1 = 1
-        if int(data[-1]) /(int(data[3]) + int(data[-1]) + 0.01) <= 0.1:
+        if int(data[-1]) / (int(data[3]) + int(data[-1]) + 0.01) <= 0.1:
             pp2_t2 = 1
 
         if pp2_t2 == 1 and pp2_t2 == 1:
@@ -81,6 +92,7 @@ def PP2():
     primary.close()
     print(len(PP2_gene))
     return PP2_gene
+
 
 def BP1():
     primary = open(here + 'PP2_BP1_process.txt', 'r')
@@ -93,6 +105,7 @@ def BP1():
 
     primary.close()
     return BP1_gene
+
 
 def PM1_PP2():
     PP2_gene = PP2()
@@ -108,7 +121,7 @@ def PM1_PP2():
 
 def coldspot_BP1():
     BP1_gene = BP1()
-    print('all BP1 gene:',len(BP1_gene))
+    print('all BP1 gene:', len(BP1_gene))
     df = pd.read_csv(here + 'hot_cold_result-and-profile-coefficient(1-sigama).txt',
                      sep='\t', low_memory=False)
     coldspot = df[df['type'] == 'coldspot']
@@ -120,44 +133,65 @@ def coldspot_BP1():
             print(elem)
             count += 1
 
-    print('coldspot and BP1:',count)
+    print('coldspot and BP1:', count)
 
 
 def PS1_PM5():
-    all_VUS = pd.read_csv(here + 'final_ALL_VUS_CON_less2star_update_variant.txt',sep='\t',low_memory=False)
+    all_VUS = pd.read_csv(
+        here +
+        'final_ALL_VUS_CON_less2star_update_variant.txt',
+        sep='\t',
+        low_memory=False)
     all_PLP = open(here + 'final_PLPupdate_variant(compute-PS1).txt', 'r')
 
     PS1 = open(here + 'PS1_variant.txt', 'w')
     PM5 = open(here + 'PM5_variant.txt', 'w')
-    #PS1 = []
-    #PM5 = []
+    # PS1 = []
+    # PM5 = []
 
     count = 0
     for var in all_PLP:
         data = var.split('\t')
-        aa_pos = int(data[-1].replace('\n',''))
+        aa_pos = int(data[-1].replace('\n', ''))
         gene = data[7]
         ref_aa = data[5]
         alt_aa = data[6]
 
         get_gene = np.array(all_VUS[all_VUS['genename'] == gene])
         for elem in get_gene:
-            if elem[-1] == aa_pos:
-                if elem[5] == ref_aa and elem[6] == alt_aa:
-                    PS1.write(elem[0] + '\t' + str(elem[1]) + '\t'
-                              + str(elem[2]) + '\t' + str(elem[3])
-                              + '\t' + str(elem[4]) + '\t'
-                              + str(elem[5]) + '\t' + str(elem[6])
-                              + '\t' + str(elem[7]) + '\t' + str(elem[8])
-                              + '\t' + str(elem[9]) + '\t' + str(elem[10]) + '\n')
+            try:
+                if elem[-1] == aa_pos:
+                    if elem[5] == ref_aa and elem[6] == alt_aa:
+                        container = [
+                            elem[0], str(
+                                elem[1]), str(
+                                elem[2]), str(
+                                elem[3]), str(
+                                elem[4]), str(
+                                elem[5]), str(
+                                elem[6]), str(
+                                elem[7]), str(
+                                    elem[8]), str(
+                                        elem[9]), str(
+                                            elem[10])]
+                        PS1.write(f"{'\t'.join(container)}\n")
 
-                if elem[5] == ref_aa and elem[6] != alt_aa:
-                    PM5.write(elem[0] + '\t' + str(elem[1]) + '\t'
-                              + str(elem[2]) + '\t' + str(elem[3])
-                              + '\t' + str(elem[4]) + '\t'
-                              + str(elem[5]) + '\t' + str(elem[6])
-                              + '\t' + str(elem[7]) + '\t' + str(elem[8])
-                              + '\t' + str(elem[9]) + '\t' + str(elem[10]) + '\n')
+                    if elem[5] == ref_aa and elem[6] != alt_aa:
+                        container = [
+                            elem[0], str(
+                                elem[1]), str(
+                                elem[2]), str(
+                                elem[3]), str(
+                                elem[4]), str(
+                                elem[5]), str(
+                                elem[6]), str(
+                                elem[7]), str(
+                                    elem[8]), str(
+                                        elem[9]), str(
+                                            elem[10])]
+                        PM5.write(f"{'\t'.join(container)}\n")
+            except Exception as e:
+                print(e)
 
         count += 1
 
@@ -167,6 +201,7 @@ def PS1_PM5():
     all_PLP.close()
 
     print('ok')
+
 
 def PS1_PM5_filter_by_dbscsnv11():
     PS1 = open(here + 'PS1_variant.txt', 'r')
@@ -202,13 +237,13 @@ def PS1_PM5_filter_by_dbscsnv11():
         if len(goal_2) > 0:
             for elem in goal_2:
                 if str(elem[0]) == str(chr):
-                    if float(elem[-1]) <= threshold and float(elem[-2]) <= threshold:
+                    if float(
+                            elem[-1]) <= threshold and float(elem[-2]) <= threshold:
                         PS1_filter.write(ps1)
         elif ref_aa != alt_aa:
             PS1_filter.write(ps1)
         else:
             continue
-
 
     print('all PS1 have been completed')
 
@@ -235,7 +270,8 @@ def PS1_PM5_filter_by_dbscsnv11():
         if len(goal_2) > 0:
             for elem in goal_2:
                 if str(elem[0]) == str(chr):
-                    if float(elem[-1]) <= threshold and float(elem[-2]) <= threshold:
+                    if float(
+                            elem[-1]) <= threshold and float(elem[-2]) <= threshold:
                         PM5_filter.write(pm5)
         elif ref_aa != alt_aa:
             PM5_filter.write(pm5)
@@ -243,6 +279,7 @@ def PS1_PM5_filter_by_dbscsnv11():
             continue
 
     print('all PM5 have been completed')
+
 
 def PS1_in_hotspot():
     df = pd.read_csv(here + 'hot_cold_result-and-profile-coefficient(1-sigama).txt',
@@ -267,6 +304,7 @@ def PS1_in_hotspot():
 
     print('ok')
 
+
 def PM5_in_hotspot():
     df = pd.read_csv(here + 'hot_cold_result-and-profile-coefficient(1-sigama).txt',
                      sep='\t', low_memory=False)
@@ -290,6 +328,7 @@ def PM5_in_hotspot():
 
     print('ok')
 
+
 def test():
     all_VUS = pd.read_csv(here + 'final_ALL_VUS_CON_less2star_update_variant.txt',
                           sep='\t', low_memory=False)
@@ -297,11 +336,13 @@ def test():
     for elem in get_gene:
         print(elem)
 
+
 def PS1_var_in_hotspot():
-    PS1 = open(here + 'PS1.AA.change.patho.hg38','r')
-    clinvar_in_hotspot = open('C:/Users/xiaxq/Desktop/tmp/all_clinvar_var_in_hotspot_add_rsid.txt','r')
-    PLP = open(here + 'final_PLP_variant.txt','r')
-    PS1_variant_in_hotspot = open(here + 'PS1_variant_in_hotspot.txt','w')
+    PS1 = open(here + 'PS1.AA.change.patho.hg38', 'r')
+    clinvar_in_hotspot = open(
+        'C:/Users/xiaxq/Desktop/tmp/all_clinvar_var_in_hotspot_add_rsid.txt', 'r')
+    PLP = open(here + 'final_PLP_variant.txt', 'r')
+    PS1_variant_in_hotspot = open(here + 'PS1_variant_in_hotspot.txt', 'w')
     count = 0
     for line in PS1:
         data = line.split('\t')
@@ -321,13 +362,14 @@ def PS1_var_in_hotspot():
                     if plp[1] == chr and plp[2] == pos and plp[4] == ref and plp[5] == alt:
                         flag = True
                 if flag == False:
-                    print(elem.replace('\n',''))
+                    print(elem.replace('\n', ''))
                     PS1_variant_in_hotspot.write(elem)
                     count += 1
 
     print(count)
     PS1.close()
     clinvar_in_hotspot.close()
+
 
 if __name__ == '__main__':
     '''
@@ -341,4 +383,3 @@ if __name__ == '__main__':
     PM5_in_hotspot()
     '''
     coldspot_BP1()
-

@@ -9,6 +9,7 @@ Calculate the hot and cold regions of mutation
 2. pandas (>=v2.2.2)
 3. scikit-learn (v>=1.4.2)
 4. scipy (v>=1.13.1)
+5. python (v>=3.6)
 
 #### Installation tutorial
 

@@ -1,57 +1,64 @@
 #!/usr/bin/python3
 
-### Made by xiaxingquan
-### April 2024
+# Made by xiaxingquan
+# April 2024
 
 # coding = utf-8
 
 here = '/data/xiaxq/topic_PM1/topic_PM1_code/database/'
 
+# get amino acid position
+
+
+def get_aa_position(aachange):
+    try:
+        change = aachange.split('.')[1]
+        result = change[1:-1]
+    except Exception as e:
+        print(e)
+
+    return result
+
+
 def annotation_data_processing():
     '''
-    inputfile:refGene.exonic_variant.function file by annovar
-    outputfile:inputfile of get-mane-iso()
+    inputfile:
+        refGene.exonic_variant.function file by annovar
+    outputfile:
+        inputfile of get-mane-iso()
     '''
 
     input = ['PLP', 'BLB', 'VUS', 'CON']
     # input = ['BLB']
 
-    for i in input:
-        input_file = here + 'clinvar_annotation/update_database-annotation-' + i + '.refGene.exonic_variant_function'
-        output_file = here + 'update_database/' + i + '_exonic.txt'
+    for var_type in input:
+        input_file = here + 'clinvar_annotation/update_database-annotation-' + \
+            var_type + '.refGene.exonic_variant_function'
+        output_file = here + 'update_database/' + var_type + '_exonic.txt'
 
         file = open(input_file, 'r')
         file_result = open(output_file, 'w')
 
-
-        ###get amino acid position
-        def get_aa_position(aachange):
-            result = ''
-            flag = False
-            for i in aachange:
-                if i in '0123456789':
-                    flag = True
-                    result = result + i
-                else:
-                    if flag:
-                        break
-
-            return result
-
-
-        ###head
-        file_result.write(
-            'chr' + '\t' + 'start' + '\t' + 'end' + '\t' +
-            'ref' + '\t' + 'alt' + '\t' + 'genename' +
-            '\t' + 'iso' + '\t' + 'exonic' + '\t' + 'aa_position' + '\n')
+        # head
+        headers = [
+            'chr',
+            'start',
+            'end',
+            'ref',
+            'alt',
+            'genename',
+            'iso',
+            'exonic',
+            'aa_position']
+        file_result.write(f"{'\t'.join(headers)}\n")
         count = 0
         for line in file:
             count += 1
             data = line.split('\t')
-            txt = data[len(data) - 5] + '\t' + data[len(data) - 4] + '\t' + data[len(data) - 3] + '\t' + data[
-                len(data) - 2] + '\t' + data[len(data) - 1]
+            container = [data[-5], data[-4], data[-3], data[-2], data[-1]]
+            txt = f"{'\t'.join(container)}"
             txt = txt.replace('\n', '')
-            if data[2][len(data[2]) - 1] != ',':
+            if data[2][-1] != ',':
                 data[2] += ','
             temp = data[2].split(',')
             '''
@@ -63,18 +70,25 @@ def annotation_data_processing():
             for i in range(0, len(temp) - 1):
                 info = temp[i].split(':')
                 if len(info) == 5:
-                    file_result.write(
-                        txt + '\t' + info[0] + '\t' + info[1] + '\t' + info[2] + '\t' + get_aa_position(info[4]) + '\n')
+                    container = [
+                        txt,
+                        info[0],
+                        info[1],
+                        info[2],
+                        get_aa_position(
+                            info[4])]
+                    file_result.write(f"{'\t'.join(container)}\n")
 
         file.close()
         file_result.close()
 
     print('ok')
 
-def get_mane_iso():
 
+def get_mane_iso():
     '''
-    input file :outputfile of annotation-data-processing,mane file
+    input file :
+        outputfile of annotation-data-processing,mane file
     '''
 
     input = ['PLP', 'BLB', 'VUS', 'CON']
@@ -89,24 +103,27 @@ def get_mane_iso():
         mane = pd.read_csv(MANE, sep='\t', low_memory=False)
         all_iso = pd.read_csv(ALL_ISO_FILE, sep='\t', low_memory=False)
 
-        ###get genelist
+        # get genelist
         genename = all_iso.iloc[:, 5]
         genelist = genename.unique()
         isolist = []
 
         for gene in genelist:
             # print(gene)
-            primary = np.array(all_iso[all_iso['genename'] == gene]['iso'].unique())
+            primary = np.array(
+                all_iso[all_iso['genename'] == gene]['iso'].unique())
             select = mane[mane['symbol'] == gene]
             if len(np.array(select['RefSeq_nuc'])) == 0:
-                isolist.append(np.array(all_iso[all_iso['genename'] == gene]['iso'])[0])
+                isolist.append(
+                    np.array(all_iso[all_iso['genename'] == gene]['iso'])[0])
             elif np.array(select['RefSeq_nuc'])[0].split('.')[0] not in primary:
                 isolist.append(primary[0])
             else:
                 isolist.append(np.array(select['RefSeq_nuc'])[0])
 
         for index, row in all_iso.iterrows():
-            if isolist[genelist.tolist().index(row['genename'])].split('.')[0] == row['iso']:
+            if isolist[genelist.tolist().index(row['genename'])].split('.')[
+                    0] == row['iso']:
                 row['iso'] = isolist[genelist.tolist().index(row['genename'])]
                 for i in range(len(row) - 1):
                     file.write(str(row[i]) + '\t')
@@ -114,7 +131,7 @@ def get_mane_iso():
 
         file.close()
 
-    ### add flag in prefix of file
+    # add flag in prefix of file
     # for i in input:
     #   file = open(here + 'tmp/final_hg19_' + vcf + '_variant.txt','r')
     #   result = open(here + 'tmp/final_hg19_' + vcf + '_variant.vcf','w')
@@ -124,6 +141,7 @@ def get_mane_iso():
     #  result.close()
 
     print('ok')
+
 
 if __name__ == '__main__':
     annotation_data_processing()

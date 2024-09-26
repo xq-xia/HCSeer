@@ -1,18 +1,21 @@
 #!/usr/bin/python3
 
-### Made by xiaxingquan
-### April 2024
+# Made by xiaxingquan
+# April 2024
 
 # coding = utf-8
 
-'''
-This file is some intermediate results or functions for file preprocessing
-'''
+"""
+    This file is some intermediate results or functions for file preprocessing
+"""
 
+import tabix
 import pandas as pd
 import numpy as np
 
 here = '/data/xiaxq/topic_PM1/topic_PM1_code/database/'
+
+
 def add_Sumbiter():
     f = open(here + 'tmp/hot_cold_spot_modify(no-mutation-ratio)(2-sigama).txt',
              'r')
@@ -80,10 +83,10 @@ def add_Sumbiter():
 
     result = open(here + 'tmp/final_variant_add_rsid.txt', 'w')
 
-    # PLP     1       1041335 1041346 AGCTCCTGCGCC    A       AGRN    NM_198576.4     exon5   298     hotspot 262     2224
-    result.write('#CHROM' + '\t' + 'POS' + '\t' + 'ID'
-                 + '\t' + 'REF' + '\t' + 'ALT' + '\t' + 'QUAL' + '\t'
-                 + 'FILTER' + '\t' + 'INFO' + '\n')
+    # PLP     1       1041335 1041346 AGCTCCTGCGCC    A       AGRN
+    # NM_198576.4     exon5   298     hotspot 262     2224
+    header = ['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO']
+    result.write(f"{'\t'.join(header)}\n")
 
     count = 0
     for line in f:
@@ -101,56 +104,111 @@ def add_Sumbiter():
             elif elem[0] == 'Y':
                 elem[0] = 24
 
-            if int(elem[0]) == int(chrom) and elem[4] == data[5] and elem[3] == data[4]:
+            if int(elem[0]) == int(
+                    chrom) and elem[4] == data[5] and elem[3] == data[4]:
                 ID = 'rs' + str(elem[2])
                 result.write(str(data[1]) + '\t' + str(data[2]) + '\t' + ID
-                             + '\t' + str(data[4]) + '\t' + str(data[5]) + '\t' + '.' + '\t'
-                             + '.' + '\t' + str(data[6]) + '|' + str(data[7]) + '|'
-                             + str(data[8]) + '|' + str(data[9]) + '|' + str(data[10])
+                             + '\t' + str(data[4]) + '\t' +
+                             str(data[5]) + '\t' + '.' + '\t'
+                             + '.' + '\t' +
+                             str(data[6]) + '|' + str(data[7]) + '|'
+                             + str(data[8]) + '|' + str(data[9]) +
+                             '|' + str(data[10])
                              + '|' + str(data[11]) + '|' + str(data[12]))
                 break
         count += 1
 
     f.close()
 
-# 1	1041335	rs3010684	AGCTCCTGCGCC	A	.	.	AGRN|NM_198576.4|exon5|298|hotspot|262|2224;CSQ=-|frameshift_variant|Transcript|ENST00000379370|5/36,-|non_coding_transcript_exon_variant|Transcript|ENST00000469403|3/3,-|upstream_gene_variant|Transcript|ENST00000479707|,-|frameshift_variant|Transcript|ENST00000620552|5/39,-|frameshift_variant|Transcript|ENST00000651234|4/38,-|frameshift_variant|Transcript|ENST00000652369|4/35,-|frameshift_variant|Transcript|NM_001305275.2|5/39,-|frameshift_variant|Transcript|NM_001364727.2|4/36,-|frameshift_variant|Transcript|NM_198576.4|5/36,-|frameshift_variant|Transcript|XM_005244749.4|5/37,-|frameshift_variant|Transcript|XM_011541429.3|5/37,-|frameshift_variant|Transcript|XM_047419836.1|5/36,-|upstream_gene_variant|Transcript|XM_047419837.1|,-|upstream_gene_variant|Transcript|XM_047419838.1|
+# 1       1041335 rs3010684       AGCTCCTGCGCC    A       .       .
+# AGRN|NM_198576.4|exon5|298|hotspot|262|2224;CSQ=-|frameshift_variant|Transcript|ENST00000379370|5/36,-|non_coding_transcript_exon_variant|Transcript|ENST00000469403|3/3,-|upstream_gene_variant|Transcript|ENST00000479707|,-|frameshift_variant|Transcript|ENST00000620552|5/39,-|frameshift_variant|Transcript|ENST00000651234|4/38,-|frameshift_variant|Transcript|ENST00000652369|4/35,-|frameshift_variant|Transcript|NM_001305275.2|5/39,-|frameshift_variant|Transcript|NM_001364727.2|4/36,-|frameshift_variant|Transcript|NM_198576.4|5/36,-|frameshift_variant|Transcript|XM_005244749.4|5/37,-|frameshift_variant|Transcript|XM_011541429.3|5/37,-|frameshift_variant|Transcript|XM_047419836.1|5/36,-|upstream_gene_variant|Transcript|XM_047419837.1|,-|upstream_gene_variant|Transcript|XM_047419838.1|
 
 
 def ENST_to_NCBI():
 
-    human =pd.read_csv('/data/xiaxq/anaconda3/envs/vep_110/lib/ensembl-vep/database/ENST_to_NCBI.txt', sep='\t', low_memory=False)
-    vep_result = open('/data/xiaxq/anaconda3/envs/vep_110/lib/ensembl-vep/result/test_240712.txt','r')
+    human = pd.read_csv(
+        '/data/xiaxq/anaconda3/envs/vep_110/lib/ensembl-vep/database/ENST_to_NCBI.txt',
+        sep='\t',
+        low_memory=False)
+    vep_result = open(
+        '/data/xiaxq/anaconda3/envs/vep_110/lib/ensembl-vep/result/test_240712.txt',
+        'r')
 
-    result = open('/data/xiaxq/anaconda3/envs/vep_110/lib/ensembl-vep/result/fin_result.txt','w')
+    result = open(
+        '/data/xiaxq/anaconda3/envs/vep_110/lib/ensembl-vep/result/fin_result.txt',
+        'w')
 
-    result.write('type' + '\t' + 'chr' + '\t' + 'gene' + '\t' + 'iso' +'\t' + 'exon' +'\t' + 'aa_pos' + '\t' + 'aa_start' + '\t' + 'aa_end' + '\t' + 'exon_pos' + '\n' )
+    headers = [
+        'type', 'chr', 'gene', 'iso', 'exon', 'aa_pos',
+        'aa_start', 'aa_end', 'exon_pos'
+    ]
+    result.write(f"{'\t'.join(headers)}\n")
 
     for line in vep_result:
         if '#' not in line:
             data = line.split('\t')
             NCBI_ISO = data[7].split(';')[0].split('|')[1].split('.')[0]
-            Ensembl_ISO = np.array(human[human['RNA_nucleotide_accession.version'].str.contains(NCBI_ISO)]['Ensembl_rna_identifier'])
+            Ensembl_ISO = np.array(human[human['RNA_nucleotide_accession.version'].str.contains(
+                NCBI_ISO)]['Ensembl_rna_identifier'])
             if len(Ensembl_ISO) == 0:
-                result.write(data[7].split(';')[0].split('|')[4] + '\t' + str(data[0])  + '\t' + data[7].split(';')[0].split('|')[0] + '\t' + data[7].split(';')[0].split('|')[1] + '\t' + data[7].split(';')[0].split('|')[2] + '\t' +  data[7].split(';')[0].split('|')[3] + '\t' + data[7].split(';')[0].split('|')[5] + '\t' + data[7].split(';')[0].split('|')[6] + '\t' + 'NAN' + '\n')
+                split_data = data[7].split(';')[0].split('|')
+                container = [
+                    split_data[4],
+                    str(data[0]),
+                    split_data[0],
+                    split_data[1],
+                    split_data[2],
+                    split_data[3],
+                    split_data[5],
+                    split_data[6],
+                    'NAN'
+                ]
+                result.write(f"{'\t'.join(container)}\n")
                 continue
             ISO_INFO = data[7].split(';')[1].split('=')[1].split(',')
             flag = 1
             for info in ISO_INFO:
                 if info.split('|')[3] in Ensembl_ISO[0]:
                     flag = 0
-                    result.write(data[7].split(';')[0].split('|')[4] + '\t' + str(data[0])  + '\t' + data[7].split(';')[0].split('|')[0] + '\t' + data[7].split(';')[0].split('|')[1] + '\t' + data[7].split(';')[0].split('|')[2] + '\t' +  data[7].split(';')[0].split('|')[3] + '\t' + data[7].split(';')[0].split('|')[5] + '\t' + data[7].split(';')[0].split('|')[6] + '\t' + info.split('|')[4] + '\n')
+                    split_data = data[7].split(';')[0].split('|')
+                    container = [
+                        split_data[4],
+                        str(data[0]),
+                        split_data[0],
+                        split_data[1],
+                        split_data[2],
+                        split_data[3],
+                        split_data[5],
+                        split_data[6],
+                        info.split('|')[4]
+                    ]
+                    result.write(f"{'\t'.join(container)}\n")
 
             if flag == 1:
-                result.write(data[7].split(';')[0].split('|')[4] + '\t' + str(data[0])  + '\t' + data[7].split(';')[0].split('|')[0] + '\t' + data[7].split(';')[0].split('|')[1] + '\t' + data[7].split(';')[0].split('|')[2] + '\t' +  data[7].split(';')[0].split('|')[3] + '\t' + data[7].split(';')[0].split('|')[5] + '\t' + data[7].split(';')[0].split('|')[6] + '\t' + 'NAN' + '\n')
+                split_data = data[7].split(';')[0].split('|')
+                container = [
+                    split_data[4],
+                    str(data[0]),
+                    split_data[0],
+                    split_data[1],
+                    split_data[2],
+                    split_data[3],
+                    split_data[5],
+                    split_data[6],
+                    'NAN'
+                ]
+                result.write(f"{'\t'.join(container)}\n")
 
     vep_result.close()
     result.close()
     print('ok')
 
+
 def var_in_hotspot_or_coldspot():
 
     df = pd.read_csv(
-        here + 'update_database/hot_cold_result-and-profile-coefficient(1-sigama).txt',
+        here +
+        'update_database/hot_cold_result-and-profile-coefficient(1-sigama).txt',
         sep='\t', low_memory=False)
     fin_vus = open(here + 'tmp/final_variant_20240711.txt', 'r')
     coldspot = df[df['type'] == 'coldspot']
@@ -172,12 +230,11 @@ def var_in_hotspot_or_coldspot():
 
     print(count)
 
-import tabix
+
 def compute_var_Alphamiessense():
 
     filename = here + 'Alphamiessense/AlphaMissense_hg38_sort.vcf.gz'
     tb = tabix.open(filename)
-
 
     vus = open(here + 'tmp/final_BLB_variant_0711.txt', 'r')
     count = 0
@@ -187,10 +244,11 @@ def compute_var_Alphamiessense():
         records = tb.query(str(data[1]), int(data[2]) - 1, int(data[2]))
         for record in records:
             if record[3] == data[5]:
-                result.write(line.replace('\n','\t') + str(record[4]) + '\n' )
+                result.write(line.replace('\n', '\t') + str(record[4]) + '\n')
         count += 1
 
     print('ok')
+
 
 def compute_var_Mutscore():
 
@@ -202,22 +260,25 @@ def compute_var_Mutscore():
     result = open(here + 'temp/vus_hot_mutscore_ADD_PLP.txt', 'w')
     for line in vus:
         data = line.split('\t')
-        records = tb.query(str(data[1]), int(data[2])-1, int(data[3]))
+        records = tb.query(str(data[1]), int(data[2]) - 1, int(data[3]))
         for record in records:
             if record[4] == data[5]:
-                result.write(str(record[0]) + '\t' + str(record[1]) + '\t' + str(record[2]) + '\t' + str(record[3]) + '\t' + str(record[4]) + '\t' + str(record[5]) + '\n' )
+                container = [str(record[0]), str(record[1]), str(record[2]), str(record[3]), str(record[4]),
+                             str(record[5])]
+                result.write(f"{'\t'.join(container)}\n")
         count += 1
 
     print('ok')
 
 
-
 '''
 get all aa length
 '''
+
+
 def get_all_BLB_or_PLP_gene():
-    PLP = open(here + 'update_database/final_BLB_variant.txt','r')
-    file = open(here + 'update_database/all_BLB_gene.vcf','w')
+    PLP = open(here + 'update_database/final_BLB_variant.txt', 'r')
+    file = open(here + 'update_database/all_BLB_gene.vcf', 'w')
 
     gene = []
     for line in PLP:
@@ -230,15 +291,22 @@ def get_all_BLB_or_PLP_gene():
 
 
 def var_in_hotspot_add_rsid():
-    all_vcf =pd.read_csv(here + 'clinvar_20240407.vcf', sep='\t', low_memory=False)
-    f = open(here + 'update_database/all_clinvar_var_in_hotspot.txt','r')
+    all_vcf = pd.read_csv(
+        here +
+        'clinvar_20240407.vcf',
+        sep='\t',
+        low_memory=False)
+    f = open(here + 'update_database/all_clinvar_var_in_hotspot.txt', 'r')
 
-    result = open(here + 'update_database/all_clinvar_var_in_hotspot_add_rsid.txt','w')
+    result = open(
+        here +
+        'update_database/all_clinvar_var_in_hotspot_add_rsid.txt',
+        'w')
 
-    #PLP     1       1041335 1041346 AGCTCCTGCGCC    A       AGRN    NM_198576.4     exon5   298
-    result.write('#CHROM' + '\t' +  'POS' + '\t' + 'ID'
-                 + '\t' + 'REF' + '\t' + 'ALT' + '\t' + 'QUAL' + '\t'
-                 + 'FILTER' + '\t' + 'INFO' + '\n')
+    # PLP     1       1041335 1041346 AGCTCCTGCGCC    A       AGRN
+    # NM_198576.4     exon5   298
+    headers = ['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO']
+    result.write(f"{'\t'.join(headers)}\n")
 
     count = 0
     for line in f:
@@ -250,34 +318,39 @@ def var_in_hotspot_add_rsid():
             chrom = 24
         goal = np.array(all_vcf[all_vcf['POS'] == int(data[2])])
         for elem in goal:
-            #print(elem[2])
+            # print(elem[2])
             if elem[0] == 'X':
                 elem[0] = 23
             elif elem[0] == 'Y':
                 elem[0] = 24
 
-
-            if int(elem[0]) == int(chrom) and elem[4] == data[5] and elem[3] == data[4]:
+            if int(elem[0]) == int(
+                    chrom) and elem[4] == data[5] and elem[3] == data[4]:
                 ID = 'rs' + str(elem[2])
-                result.write(str(data[1]) + '\t' +  str(data[2]) + '\t' + ID
-                 + '\t' + str(data[4]) + '\t' + str(data[5]) + '\t' + '.' + '\t'
-                 + '.' + '\t' + str(data[6]) + '|' + str(data[7]) + '|'
-                 + str(data[8]) + '|' + str(data[9]))
+                result.write(str(data[1]) + '\t' + str(data[2]) + '\t' + ID
+                             + '\t' + str(data[4]) + '\t' +
+                             str(data[5]) + '\t' + '.' + '\t'
+                             + '.' + '\t' +
+                             str(data[6]) + '|' + str(data[7]) + '|'
+                             + str(data[8]) + '|' + str(data[9]))
                 break
         count += 1
 
     f.close()
 
 
-#### need vep
+# need vep
 
 def vep_result_process():
-    f = open("/data/xiaxq/anaconda3/envs/vep_110/lib/ensembl-vep/result/test_BLB_240805.txt",'r')
-    result = open("/data/xiaxq/anaconda3/envs/vep_110/lib/ensembl-vep/result/test_BLB_240805_process.txt",'w')
+    f = open(
+        "/data/xiaxq/anaconda3/envs/vep_110/lib/ensembl-vep/result/test_BLB_240805.txt",
+        'r')
+    result = open(
+        "/data/xiaxq/anaconda3/envs/vep_110/lib/ensembl-vep/result/test_BLB_240805_process.txt",
+        'w')
 
-    result.write('#CHROM' + '\t' +  'POS' + '\t' + 'ID'
-                 + '\t' + 'REF' + '\t' + 'ALT' + '\t' + 'QUAL' + '\t'
-                 + 'FILTER' + '\t' + 'INFO' + '\n')
+    headers = ['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO']
+    result.write(f"{'\t'.join(headers)}\n")
     for line in f:
         if line[0] != '#':
             data = line.split('\t')
@@ -287,7 +360,13 @@ def vep_result_process():
             for elem in CSQ:
                 if iso.split('.')[0] in elem:
                     flag = 1
-                    result.write(line.split(';')[0] + ';' + elem.replace('\n','') + '\n')
+                    result.write(
+                        line.split(';')[0] +
+                        ';' +
+                        elem.replace(
+                            '\n',
+                            '') +
+                        '\n')
             if flag == 0:
                 print(data[7].split(';')[0])
 
@@ -296,20 +375,30 @@ def vep_result_process():
 
     print('ok')
 
-def vep_result_process_2():
-    f = open("/data/xiaxq/anaconda3/envs/vep_110/lib/ensembl-vep/result/test_BLB_240805_process.txt",'r')
-    result = open("/data/xiaxq/anaconda3/envs/vep_110/lib/ensembl-vep/result/test_BLB_240805_process_process.txt",'w')
 
-    result.write('#CHROM' + '\t' +  'POS' + '\t' + 'ID'
-                 + '\t' + 'REF' + '\t' + 'ALT' + '\t' + 'QUAL' + '\t'
-                 + 'FILTER' + '\t' + 'INFO' + '\n')
+def vep_result_process_2():
+    f = open(
+        "/data/xiaxq/anaconda3/envs/vep_110/lib/ensembl-vep/result/test_BLB_240805_process.txt",
+        'r')
+    result = open(
+        "/data/xiaxq/anaconda3/envs/vep_110/lib/ensembl-vep/result/test_BLB_240805_process_process.txt",
+        'w')
+
+    headers = ['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO']
+    result.write(f"{'\t'.join(headers)}\n")
+
     for line in f:
         if line[0] != '#':
             data = line.split('\t')
-            legth = data[7].split(';')[1].split('||||')[1].split('|')#[2].split('/')[1]
+            legth = data[7].split(';')[1].split(
+                '||||')[1].split('|')  # [2].split('/')[1]
             if len(legth) > 2:
                 if len(legth[2].split('/')) == 2:
-                    result.write(line.split(';')[0] + '|' + legth[2].split('/')[1] + '\n')
+                    result.write(
+                        line.split(';')[0] +
+                        '|' +
+                        legth[2].split('/')[1] +
+                        '\n')
                 else:
                     print(data[7].split(';')[0])
             else:
@@ -323,12 +412,11 @@ def vep_result_process_2():
 
 def get_ALL_VUS_CON_less_2star():
 
-
-    fin_vus = open(here + 'clinvar_20240407.vcf','r')
+    fin_vus = open(here + 'clinvar_20240407.vcf', 'r')
 
     count = 0
 
-    result = open(here + 'update_database/ALL_VUS_CON_less2star.txt','w')
+    result = open(here + 'update_database/ALL_VUS_CON_less2star.txt', 'w')
 
     for line in fin_vus:
         if count == 0:
@@ -339,10 +427,25 @@ def get_ALL_VUS_CON_less_2star():
             if 'CLNREVSTAT=criteria_provided,_multiple_submitters' in line or 'reviewed_by_expert_panel' in line or 'CLNREVSTAT=practice_guideline' in line:
                 continue
             else:
-                result.write(str(line.split('\t')[0]) + '\t' + str(line.split('\t')[1]) + '\t' +  str(int(line.split('\t')[1]) + len(line.split('\t')[3]) -1) + '\t' + str(line.split('\t')[3]) + '\t' + str(line.split('\t')[4]) + '\n' )
+                container = [
+                    line.split('\t')[0],
+                    str(line.split('\t')[1]),
+                    str(int(line.split('\t')[1]) +
+                        len(line.split('\t')[3]) - 1),
+                    line.split('\t')[3],
+                    line.split('\t')[4]
+                ]
+                result.write(f"{'\t'.join(container)}\n")
 
         else:
-            result.write(str(line.split('\t')[0]) + '\t' + str(line.split('\t')[1]) + '\t' +  str(int(line.split('\t')[1]) + len(line.split('\t')[3]) -1) + '\t' + str(line.split('\t')[3]) + '\t' + str(line.split('\t')[4]) + '\n' )
+            container = [
+                line.split('\t')[0],
+                str(line.split('\t')[1]),
+                str(int(line.split('\t')[1]) + len(line.split('\t')[3]) - 1),
+                line.split('\t')[3],
+                line.split('\t')[4]
+            ]
+            result.write(f"{'\t'.join(container)}\n")
         count += 1
 
     print('ok')

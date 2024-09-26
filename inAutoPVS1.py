@@ -2,6 +2,7 @@ import numpy as np
 
 here = 'C:/Users/xiaxq/Desktop/topic-PM1-tep-file/'
 
+
 def vaild():
     allVar_fliter = open(here + 'AutoPVS1_test.txt', 'r')
     geneList = []
@@ -13,23 +14,22 @@ def vaild():
 
 
 def extractGene(input):
-    allPLP = open(input,'r')
+    allPLP = open(input, 'r')
     geneList = []
     for line in allPLP:
         gene = line.split('\t')[2]
         if gene not in geneList:
             geneList.append(gene)
 
-    PP2 = open(here + 'PP2.genes.hg38','r')
+    PP2 = open(here + 'PP2.genes.hg38', 'r')
 
     PP2_PM1 = []
 
     for line in PP2:
-        if line.replace('\n','') in geneList:
-            PP2_PM1.append(line.replace('\n',''))
+        if line.replace('\n', '') in geneList:
+            PP2_PM1.append(line.replace('\n', ''))
 
     print(len(PP2_PM1))
-
 
     # allVar = open(here + 'clinvar_all_2star.txt','r')
     # allVar_fliter_by_hotGene = open(here + 'clinvar_all_filter_by_hotGene_2star.txt','w')
@@ -41,6 +41,7 @@ def extractGene(input):
     #         allVar_fliter_by_hotGene.write(line)
     # print('ok')
 
+
 def contained_in_bed(bed_dict, chrom, start, end):
     """
     Determine whether a variant is contained in the bed region.
@@ -51,18 +52,22 @@ def contained_in_bed(bed_dict, chrom, start, end):
     :return: Boolean value
     """
     chrom = str(chrom)
-    if "chr" not in chrom:
-        chrom = "chr" + chrom
-    # max(start1, start2) < min(end1, end2)
-    for key in bed_dict:
-        if bed_dict[key]["chrom"] == chrom and \
-                max(bed_dict[key]["start"], start) < min(bed_dict[key]["end"], end):
-            return True, key
-    return False
+    try:
+        if "chr" not in chrom:
+            chrom = "chr" + chrom
+        # max(start1, start2) < min(end1, end2)
+        for key in bed_dict:
+            if bed_dict[key]["chrom"] == chrom and \
+                    max(bed_dict[key]["start"], start) < min(bed_dict[key]["end"], end):
+                return True, key
+        return False
+    except Exception as e:
+        print(e)
+
 
 def file_process(file_input):
-    input = open(file_input,'r')
-    hot = open(here + 'expert_curated_domains_hg38.bed','r')
+    input = open(file_input, 'r')
+    hot = open(here + 'expert_curated_domains_hg38.bed', 'r')
     count = 0
     p = 0
     b = 0
@@ -78,7 +83,8 @@ def file_process(file_input):
             chrom = "chr" + chrom
         hot.seek(0)
         for h in hot:
-            if h.split('\t')[0] == chrom and max(h.split('\t')[1], start) <= min(h.split('\t')[2], end):
+            if h.split('\t')[0] == chrom and max(h.split('\t')[
+                    1], start) <= min(h.split('\t')[2], end):
                 count += 1
                 if type == 'PLP':
                     p += 1
@@ -88,9 +94,10 @@ def file_process(file_input):
                     v += 1
                 if type == 'CON':
                     c += 1
-                #print(True)
+                # print(True)
                 break
-    print(count,p,b,v,c)
+    print(count, p, b, v, c)
+
 
 if __name__ == '__main__':
     """
@@ -99,7 +106,6 @@ if __name__ == '__main__':
     clinvar_all_filter_by_hotGene.txt clinvar_all_filter_by_hotGene_2star.txt
     AutuPVS1_test.txt (no type)  var_in_hotspot.txt
     """
-    #file_process(here + 'clinvar_all_filter_by_hotGene_2star.txt')
+    # file_process(here + 'clinvar_all_filter_by_hotGene_2star.txt')
     extractGene(here + 'hot_cold_spot_(1-sigama).txt')
-    #vaild()
-
+    # vaild()

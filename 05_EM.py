@@ -1,10 +1,11 @@
 #!/usr/bin/python3
 
-### Made by xiaxingquan
-### April 2024
+# Made by xiaxingquan
+# April 2024
 
 # -*- coding: utf-8 -*-
 
+from scipy.stats import norm
 import math
 
 import numpy as np
@@ -14,14 +15,15 @@ from main import KDE
 
 np.seterr(divide='ignore', invalid='ignore')
 
-from scipy.stats import norm
 
 np.random.seed(0)  # for reproducibility
 
 here = '/data/xiaxq/topic_PM1/topic_PM1_code/database/'
 
+
 def e_step(x, mean, std, w):
-    """E-Step: Compute the responsibilities
+    """
+    E-Step: Compute the responsibilities
     """
     # Compute the densities of the points under the two normal distributions
     prob = []
@@ -39,7 +41,8 @@ def e_step(x, mean, std, w):
 
 
 def m_step(x, prob):
-    """M-Step: Update the GMM parameters
+    """
+    M-Step: Update the GMM parameters
     """
     # Update means
     mean = []
@@ -49,7 +52,14 @@ def m_step(x, prob):
     # Update standard deviations
     std = []
     for i in range(0, len(prob)):
-        std.append(np.sqrt(np.dot(prob[i], (x - mean[i]) ** 2) / np.sum(prob[i])))
+        std.append(
+            np.sqrt(
+                np.dot(
+                    prob[i],
+                    (x -
+                     mean[i]) ** 2) /
+                np.sum(
+                    prob[i])))
 
     # Update mixing weights
     w = []
@@ -85,7 +95,7 @@ def gmm_em(x, max_iter=100, mean=[], std=[], w=[]):
     return mean, std, w
 
 
-##Interval overlap processing
+# Interval overlap processing
 def merge_intervals(intervals):
     # Sort intervals by their starting position
     intervals.sort(key=lambda x: x[0])
@@ -94,7 +104,8 @@ def merge_intervals(intervals):
     merged = []
 
     for interval in intervals:
-        # If the merged list is empty or the current interval does not overlap with the last interval in the list
+        # If the merged list is empty or the current interval does not overlap
+        # with the last interval in the list
         if not merged or merged[-1][1] < interval[0]:
             merged.append(interval)
         else:
@@ -107,7 +118,7 @@ def merge_intervals(intervals):
     return merged
 
 
-### result file
+# result file
 
 def EM():
     result_file = open(
@@ -131,15 +142,15 @@ def EM():
         iso = flag['iso'].unique()[0]
         max_position = np.array(flag['aa_position']).max()
 
-        ##variant
+        # variant
         PLP = flag[flag['type'] == 'PLP']
         BLB = flag[flag['type'] == 'BLB']
 
-        ##variant position
+        # variant position
         PLP_pos = np.array(PLP['aa_position'])
         BLB_pos = np.array(BLB['aa_position'])
 
-        #######analysis PLP variants
+        # analysis PLP variants
 
         PLP_primary_data = []
         # # print(len(flag))
@@ -149,11 +160,12 @@ def EM():
         PLP_x_all = np.linspace(0, max_position,
                                 max_position)
 
-        ### prevent variant length from being 0, resulting in a denominator of 0
+        # prevent variant length from being 0, resulting in a denominator of 0
         if len(PLP_primary_data) > 0:
             kde = KDE(PLP_primary_data)
             #    print('Optimal bandwidth:', kde.hopt)
-            PLP_density_estimation_all = np.array([kde.compute_density(xi) for xi in PLP_x_all])
+            PLP_density_estimation_all = np.array(
+                [kde.compute_density(xi) for xi in PLP_x_all])
         else:
             PLP_density_estimation_all = np.array([0 for xi in PLP_x_all])
 
@@ -175,20 +187,22 @@ def EM():
         if len(data) != 0:
             kde = KDE(data)
             #   print('Optimal bandwidth:', kde.hopt)
-            density_estimation = np.array([kde.compute_density(xi) for xi in x])
-            ###Obtain maximum kernel density
+            density_estimation = np.array(
+                [kde.compute_density(xi) for xi in x])
+            # Obtain maximum kernel density
 
             max = []
             if density_estimation[1] < density_estimation[0]:
                 max.append(0)
             for i in range(1, len(density_estimation) - 1):
                 if density_estimation[i] > density_estimation[i - 1] and density_estimation[i] > density_estimation[
-                    i + 1]:
+                        i + 1]:
                     max.append(i)
-            if density_estimation[len(density_estimation) - 2] < density_estimation[len(density_estimation) - 1]:
+            if density_estimation[len(
+                    density_estimation) - 2] < density_estimation[len(density_estimation) - 1]:
                 max.append(len(density_estimation) - 1)
 
-            ###Obtain initial mean, standard deviation, and weight
+            # Obtain initial mean, standard deviation, and weight
 
             mean = max
             std = []
@@ -214,10 +228,11 @@ def EM():
                 # print('left', left, 'right', right)
                 std.append((right - left) / 2)
                 w.append(1 / len(max))
-            #
-            ###Perform expected value maximization iteration
 
-            final_dist_params = gmm_em(data, max_iter=30, mean=mean, std=std, w=w)
+            # Perform expected value maximization iteration
+
+            final_dist_params = gmm_em(
+                data, max_iter=30, mean=mean, std=std, w=w)
             PLP_result = []
             for i in range(len(final_dist_params[0])):
                 if math.isnan(final_dist_params[0][i]):
@@ -239,7 +254,7 @@ def EM():
             density_estimation = np.array([0 for xi in x])
             PLP_result = []
 
-        ### get hotspot area
+        # get hotspot area
         PLP_d = []
         for i in range(len(PLP_result)):
             j = PLP_result[i][0]
@@ -247,12 +262,12 @@ def EM():
                 PLP_d.append(j)
                 j += 0.1
 
-        ### assignment
+        # assignment
         PLP_y = []
         for i in range(len(PLP_d)):
             PLP_y.append(-0.0025)
 
-        ####### similarly for BLB
+        # similarly for BLB
 
         BLB_primary_data = []
         # # print(len(flag))
@@ -262,11 +277,12 @@ def EM():
         BLB_x_all = np.linspace(0, max_position,
                                 max_position)
 
-        ### prevent variant length from being 0, resulting in a denominator of 0
+        # prevent variant length from being 0, resulting in a denominator of 0
         if len(BLB_primary_data) > 0:
             kde = KDE(BLB_primary_data)
             #    print('Optimal bandwidth:', kde.hopt)
-            BLB_density_estimation_all = np.array([kde.compute_density(xi) for xi in BLB_x_all])
+            BLB_density_estimation_all = np.array(
+                [kde.compute_density(xi) for xi in BLB_x_all])
         else:
             BLB_density_estimation_all = np.array([0 for xi in BLB_x_all])
 
@@ -287,22 +303,27 @@ def EM():
         x = np.linspace(0, max_position,
                         max_position)
         if len(data) != 0:
-            kde = KDE(data)
+            try:
+                kde = KDE(data)
+            except Exception as e:
+                print(e)
             #    print('Optimal bandwidth:', kde.hopt)
-            density_estimation = np.array([kde.compute_density(xi) for xi in x])
-            ###Obtain maximum kernel density
+            density_estimation = np.array(
+                [kde.compute_density(xi) for xi in x])
+            # Obtain maximum kernel density
 
             max = []
             if density_estimation[1] < density_estimation[0]:
                 max.append(0)
             for i in range(1, len(density_estimation) - 1):
                 if density_estimation[i] > density_estimation[i - 1] and density_estimation[i] > density_estimation[
-                    i + 1]:
+                        i + 1]:
                     max.append(i)
-            if density_estimation[len(density_estimation) - 2] < density_estimation[len(density_estimation) - 1]:
+            if density_estimation[len(
+                    density_estimation) - 2] < density_estimation[len(density_estimation) - 1]:
                 max.append(len(density_estimation) - 1)
 
-            ###Obtain initial mean, standard deviation, and weight
+            # Obtain initial mean, standard deviation, and weight
 
             mean = max
             std = []
@@ -329,9 +350,10 @@ def EM():
                 std.append((right - left) / 2)
                 w.append(1 / len(max))
             #
-            ###Perform expected value maximization iteration
+            # Perform expected value maximization iteration
 
-            final_dist_params = gmm_em(data, max_iter=30, mean=mean, std=std, w=w)
+            final_dist_params = gmm_em(
+                data, max_iter=30, mean=mean, std=std, w=w)
             BLB_result = []
             for i in range(len(final_dist_params[0])):
                 if math.isnan(final_dist_params[0][i]):
@@ -353,7 +375,7 @@ def EM():
             density_estimation = np.array([0 for xi in x])
             BLB_result = []
 
-        ### get coldspot area
+        # get coldspot area
         BLB_d = []
         for i in range(len(BLB_result)):
             j = BLB_result[i][0]
@@ -361,13 +383,13 @@ def EM():
                 BLB_d.append(j)
                 j += 0.1
 
-        ### assignment
+        # assignment
         BLB_y = []
         for i in range(len(BLB_d)):
             BLB_y.append(-0.001)
 
-        #### cumpute variant number in every area
-        ###hotspot
+        # cumpute variant number in every area
+        # hotspot
         for elem in PLP_result:
             p_count = 0
             b_count = 0
@@ -383,7 +405,7 @@ def EM():
             ratio = 1 - (b_count + 1 / 2) / (p_count + 1 / 2)
             elem.append(round(ratio, 3))
 
-        ###coldspot
+        # coldspot
         for elem in BLB_result:
             p_count = 0
             b_count = 0
@@ -409,7 +431,8 @@ def EM():
             txt = ':'.join(str(word) for word in elem)
             BLB_txt += txt + ';'
 
-        result_file.write(chromosome + '\t' + gene + '\t' + iso + '\t' + PLP_txt + '\t' + BLB_txt + '\n')
+        container = [chromosome, gene, iso, PLP_txt, BLB_txt]
+        result_file.write(f"{'\t'.join(container)}\n")
 
     result_file.close()
 
@@ -430,6 +453,7 @@ def EM():
     plt.ylabel(u'Nuclear density', fontsize=14, color='b')
     plt.show()
     '''
+
 
 if __name__ == '__main__':
     EM()
