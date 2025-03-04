@@ -1,4 +1,6 @@
-#Mutation hotspot cold spot area
+HCSeer: A Classification Tool for Human Genetic Variant
+Hot and Cold Spots Designed for PM1 and Benign Criteria
+in the ACMG Guideline
 
 #### Introduction
 Calculate the hot and cold regions of mutation
