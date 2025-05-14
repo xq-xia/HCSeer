@@ -1,23 +1,33 @@
-HCSeer: A Classification Tool for Human Genetic Variant
-Hot and Cold Spots Designed for PM1 and Benign Criteria
-in the ACMG Guideline
+# [HCSeer: A Classification Tool for Human Genetic Variant Hot and Cold Spots Designed for PM1 and Benign Criteria in the ACMG Guideline](https://genemed.tech/hcseer/)
+[![github](https://img.shields.io/badge/numpy->=1.26.4-brightgreen.svg)](https://numpy.org/doc/stable/reference/index.html)
+[![github](https://img.shields.io/badge/pandas->=2.2.2-pink.svg)](https://pandas.pydata.org/)
+[![github](https://img.shields.io/badge/scikit_learn->=1.4.2-red.svg)](https://scikit-learn.org/dev/index.html)
+[![github](https://img.shields.io/badge/scipy->=1.13.1-yellow.svg)](https://scipy.org/)
+[![github](https://img.shields.io/badge/python->=3.6-Olive.svg)](https://www.python.org/)
 
-#### Introduction
-Calculate the hot and cold regions of mutation
+HCSeeker employs the Kernel Density Estimation (KDE) algorithm and the Expectation-Maximization (EM) algorithm from machine learning to calculate the variant density on the amino acid sequence of each gene and identify potential hot and cold spot regions.
+<div align="center">
+  <img src="data/HCSeer_0507.png" alt="HCSeer Graph" width=1000px>
+</div>
 
  
-#### Python packages that need to be installed
-1. numpy (>=v1.26.4)
-2. pandas (>=v2.2.2)
+## Python packages that need to be installed
+1. numpy (v>=1.26.4)
+2. pandas (v>=2.2.2)
 3. scikit-learn (v>=1.4.2)
 4. scipy (v>=1.13.1)
 5. python (v>=3.6)
 
-#### Installation tutorial
+## Installation tutorial
 
 These scripts do not require compilation.
 
-#### Instructions for use
+## Annotate whether our variant is located in a cold hot spot regions
+How to use `Auto-annotation.py` scripts to annotate whether our variants are located in cold and hot spot regions
+```bash
+python Auto-annotation.py -i /path/to/your/input.vcf -o /path/to/your/output.vcf -buildver hg38
+```
+## Other script purposes
 
 - 00_database-processing.sh
 
@@ -43,9 +53,7 @@ These scripts do not require compilation.
 - 07_profile-coefficient.py
 
     Calculate contour coefficient
-- Auto-annotation.py
-
-    comment script 
+  
 - hg19-to-hg38.sh
 
     Script for converting hg19 genome version coordinates to hg38 version
